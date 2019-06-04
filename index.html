@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>repl.it</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+		<script src="p5.min.js"></script>
+		<script src="globals.js"></script>
+    <script src="script.js"></script>
+		<div id="sketch-holder"></div>
+		<div>
+			<p><span>Base Font</span><select id="baseFont" onChange="updateBaseFont()"></select></p>
+			<p><span>Target Font</span><select id="targetFont" onChange="updateTargetFont()"></select></p>
+		</div>
+		<div>
+			<input type="button" value="Add Font" onClick="uploadFont()"/>
+			<input type="file" id="fontUpload"/>
+		</div>
+		<div>
+			<br/>
+			<span>BirbText and AlienText fonts made by Deborah#6709 based on the symbols designed by Creator Ink and The Game Theorists.</span>
+		</div>
+  </body>
+</html>
