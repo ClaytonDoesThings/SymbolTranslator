@@ -2,7 +2,8 @@ function preload() {
 	let fontsToLoad = {
 		Wingdings: "Wingdings-Repaired.ttf",
 		AlienText: "AlientextV2-Regular-fixed.ttf",
-		BirbText: "Birbtext20-Regular.ttf"
+		BirbText: "TenretniOlleh.ttf",
+		OldBirbText: "Birbtext20-Regular.ttf"
 	};
 
 	for (let i in fontsToLoad) {

@@ -16,3 +16,6 @@
 1.1.1:
 * Added Wingdings
 * Updated BirbText
+
+1.1.2:
+* Updated BirbText
