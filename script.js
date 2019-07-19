@@ -1,20 +1,47 @@
 function preload() {
 	let fontsToLoad = {
-		Wingdings: "Wingdings-Repaired.ttf",
-		AlienText: "AlientextV2-Regular-fixed.ttf",
-		BirbText: "TenretniOlleh.ttf",
-		OldBirbText: "Birbtext20-Regular.ttf"
+		Wingdings: {
+			fileName: "Wingdings-Repaired.ttf",
+			keyboardLayouts: {
+				abc: keyboardLayouts.abc,
+				qwerty: keyboardLayouts.qwerty
+			}
+		},
+		AlienText: {
+			fileName: "AlientextV2-Regular-fixed.ttf",
+			keyboardLayouts: {
+				abc: keyboardLayouts.abc,
+				qwerty: keyboardLayouts.qwerty
+			}
+		},
+		BirbText: {
+			fileName: "TenretniOlleh.ttf",
+			keyboardLayouts: {
+				abc: keyboardLayouts.abc,
+				qwerty: keyboardLayouts.qwerty
+			}
+		},
+		OldBirbText: {
+			fileName: "Birbtext20-Regular.ttf",
+			keyboardLayouts: {
+				abc: keyboardLayouts.abc,
+				qwerty: keyboardLayouts.qwerty
+			}
+		}
 	};
 
 	for (let i in fontsToLoad) {
-		fonts[i] = loadFont('fonts/' + fontsToLoad[i]);
+		fonts[i] = {
+			font: loadFont('fonts/' + fontsToLoad[i].fileName),
+			keyboardLayouts: fontsToLoad[i].keyboardLayouts,
+		};
 	}
 }
 
 function charInFont(font, chr) {
-	if (typeof(font) !== 'string') {
+	if (typeof(font.font) !== 'string') {
 		let unicode = unchar(chr);
-		let glyphs = font.font.glyphs.glyphs;
+		let glyphs = font.font.font.glyphs.glyphs;
 		for (let i in glyphs) {
 			if (glyphs[i].unicode === unicode) {
 				return true;
@@ -28,7 +55,7 @@ function charInFont(font, chr) {
 
 function updateSelectOptions() {
 	let bFElem = document.getElementById("baseFont");
-	let tFElem = document.getElementById("targetFont")
+	let tFElem = document.getElementById("targetFont");
 	let tempBFV = bFElem.value;
 	let tempTFV = tFElem.value;
 
@@ -44,10 +71,12 @@ function updateSelectOptions() {
 
 function updateBaseFont() {
 	baseFont = fonts[document.getElementById("baseFont").value];
+	updateBaseFontLayoutOptions();
 }
 
 function updateTargetFont() {
 	targetFont = fonts[document.getElementById("targetFont").value];
+	updateTargetFontLayoutOptions();
 }
 
 function uploadFont() {
@@ -59,7 +88,10 @@ function uploadFont() {
 			var reader = new FileReader();
 			reader.onload = ((evt) => {
 				loadFont(evt.target.result, ((font) => {
-					fonts[file.name.split('.')[0]] = (font);
+					fonts[file.name.split('.')[0]] = {
+						font: font,
+						keyboardLayouts: fonts["Arial"].keyboardLayouts
+					};
 					updateSelectOptions();
 				}));
 			});
@@ -68,6 +100,65 @@ function uploadFont() {
 			console.log("Unsupported format. Please use .ttf or .otf");
 		}
 	}
+}
+
+
+function uploadKeyboardLayout() {
+	let files = document.getElementById("layoutUpload").files;
+	if (files.length > 0) {
+		let file = files[0];
+		var reader = new FileReader();
+		reader.onload= ((evt) => {
+			let result = evt.target.result;
+			if (result.length === 45) {
+				for (let i in fonts) {
+					fonts[i].keyboardLayouts[file.name.split('.')[0]] = result;
+				}
+				updateBaseFontLayoutOptions();
+				updateTargetFontLayoutOptions();
+			} else {
+				console.log("Custom keyboard layout must be 45 characters long");
+			}
+		});
+		reader.readAsText(file);
+	}
+}
+function updateBaseFontLayoutOptions() {
+	let bFLElem = document.getElementById("baseFontLayout");
+	let tempBFLV = bFLElem.value;
+
+	var layouts = Object.keys(baseFont.keyboardLayouts);
+	var options = "";
+	for (i in baseFont.keyboardLayouts) {
+		options += '<option value\"' + i + '\">' + i + '</option>'
+	}
+	bFLElem.innerHTML = options;
+	if (layouts.indexOf(Object.keys(baseFont.keyboardLayouts).find(key => baseFont.keyboardLayouts[key] === encodeLayout)) === -1) {
+		encodeLayout = baseFont.keyboardLayouts[Object.keys(baseFont.keyboardLayouts)[0]];
+	}
+}
+
+function updateTargetFontLayoutOptions() {
+	let tFLElem = document.getElementById("targetFontLayout");
+	let tempBFLV = tFLElem.value;
+
+	var layouts = Object.keys(targetFont.keyboardLayouts);
+	var options = "";
+	for (i in targetFont.keyboardLayouts) {
+		options += '<option value\"' + i + '\">' + i + '</option>'
+	}
+	tFLElem.innerHTML = options;
+	if (layouts.indexOf(Object.keys(targetFont.keyboardLayouts).find(key => targetFont.keyboardLayouts[key] === decodeLayout)) === -1) {
+		decodeLayout = targetFont.keyboardLayouts[Object.keys(targetFont.keyboardLayouts)[0]];
+	}
+}
+
+function updateBaseFontLayout() {
+	encodeLayout = baseFont.keyboardLayouts[document.getElementById("baseFontLayout").value];
+}
+
+function updateTargetFontLayout() {
+	decodeLayout = targetFont.keyboardLayouts[document.getElementById("targetFontLayout").value];
 }
 
 function setup() {
@@ -79,6 +170,8 @@ function setup() {
 	updateSelectOptions();
 	document.getElementById("baseFont").value = "Arial";
 	document.getElementById("targetFont").value = "BirbText";
+	updateBaseFontLayoutOptions();
+	updateTargetFontLayoutOptions();
 }
 
 function windowResized() {
@@ -89,6 +182,25 @@ function windowResized() {
 var mClicked = false;
 function mouseReleased() {
 	mClicked = true;
+}
+
+function getCharacterColor(chr) {
+	let unChr = unchar(chr);
+	if (unChr >= 48 && unChr <= 57) {
+		return ([7, 226, 255]);
+	} else if (
+		unChr === 42 ||
+		unChr === 43 ||
+		unChr === 45 ||
+		unChr === 47 ||
+		unChr === 61
+	) {
+		return ([249, 246, 29]);
+	} else if ((unChr >= 97 && unChr <=122) || (unChr >= 65 && unChr <= 90)) {
+		return ([224, 24, 24]);
+	} else {
+		return 255;
+	}
 }
 
 function drawText() {
@@ -111,23 +223,8 @@ function drawText() {
 		let x = sX+spacing*(i-chrsPerRow*Math.floor(i/chrsPerRow));
 		let y = sY+spacing*Math.floor(i/chrsPerRow);
 		let chr = txt[i];
-		textFont(mode === "Encode" ? (charInFont(targetFont, chr) ? targetFont : baseFont) : baseFont);
-		let unChr = unchar(chr);
-		if (unChr >= 48 && unChr <= 57) {
-			fill(7, 226, 255);
-		} else if (
-			unChr === 42 ||
-			unChr === 43 ||
-			unChr === 45 ||
-			unChr === 47 ||
-			unChr === 61
-		) {
-			fill(249, 246, 29);
-		} else if (unChr >= 65 && unChr <= 90) {
-			fill(224, 24, 24);
-		} else {
-			fill(255);
-		}
+		textFont((mode === "Encode" ? (charInFont(targetFont, chr) ? targetFont : baseFont) : baseFont).font);
+		fill(getCharacterColor(chr));
 		text(chr, x, y);
 	}
 
@@ -135,20 +232,29 @@ function drawText() {
 }
 
 function keyPressed() {
-	let k = key.toUpperCase();
-	if (k.length === 1) {
-		chrs += k;
-	} else if (k === "BACKSPACE") {
-		chrs = chrs.substr(0, chrs.length-1);
-	} else if (!(
-		k === "SHIFT" ||
-		k === "ALT" ||
-		k === "CONTROL" ||
-		k === "META" ||
-		k === "CONTEXTMENU" ||
-		k.match("ARROW")
-	)) {
-		console.log("Unkown key: " + k + " typed.");
+	if (key === "Shift") {
+		capitalize = true;
+	} else {
+		let k = capitalize ? key.toUpperCase() : key.toLowerCase();
+		if (k.length === 1) {
+			chrs += k;
+		} else if (key === "Backspace") {
+			chrs = chrs.substr(0, chrs.length-1);
+		} else if (!(
+			key === "Alt" ||
+			key === "Control" ||
+			key === "Meta" ||
+			key === "Contextmenu" ||
+			key.match("Arrow")
+		)) {
+			console.log("Unkown key: " + key + " typed.");
+		}
+	}
+}
+
+function keyReleased() {
+	if (key === "Shift") {
+		capitalize = false;
 	}
 }
 
@@ -162,7 +268,7 @@ function draw() {
 	// Mode Text
 	push();
 	noStroke();
-	textFont(baseFont);
+	textFont(baseFont.font);
 	textSize(bH*0.0625);
 	textAlign(LEFT, TOP);
 	fill(255);
@@ -173,7 +279,7 @@ function draw() {
 	// Version Text
 	push();
 	noStroke();
-	textFont(baseFont);
+	textFont(baseFont.font);
 	textSize(bH*0.0375);
 	textAlign(RIGHT, TOP);
 	fill(255);
@@ -200,42 +306,10 @@ function draw() {
 		rect(x, y, size, size, size*0.1);
 
 		push();
-		let chr;
-		if (i < 10) {
-			fill(7, 226, 255);
-			chr = char(48+i);
-		} else if (i < 15) {
-			fill(249, 246, 29);
-			chr = (i === 10 ?
-				'*' :
-				(i === 11 ?
-					'+' :
-					(i === 12 ?
-						'-' :
-						(i === 13 ?
-							'/' :
-							'='
-						)
-					)
-				)
-			);
-		} else if (i < 41) {
-			fill(224, 24, 24);
-			chr = char(65+i-15);
-		} else {
-			fill(255);
-			chr = (i === 41 ?
-				':' :
-				(i === 42 ?
-					',' :
-					(i === 43 ?
-						'.' :
-						' '
-					)
-				)
-			);
-		}
-		textFont(mode === "Encode" ? baseFont : (charInFont(targetFont, chr) ? targetFont : baseFont));
+		let layout = (mode === "Encode" ? encodeLayout : decodeLayout);
+		let chr = capitalize ? layout[i].toUpperCase() : layout[i].toLowerCase();
+		fill(getCharacterColor(chr));
+		textFont((mode === "Encode" ? baseFont : (charInFont(targetFont, chr) ? targetFont : baseFont)).font);
 		noStroke();
 		textAlign(CENTER, CENTER);
 		textSize(size*0.75);
@@ -318,6 +392,17 @@ function draw() {
 		function () {chrs = prompt("Paste:");}
 	)
 
+	//Shift
+	button(
+		capitalize ? "SHIFT" : "Shift",
+		bW/2-spacing*((1.125+0.75)/2),
+		startingY+spacing*2,
+		size*1.75,
+		size,
+		size*0.5,
+		function () {capitalize = !capitalize;}
+	);
+
 	pop();
 
 	mClicked = false;
@@ -325,7 +410,7 @@ function draw() {
 
 function button(t, x, y, w, h, tS, f) {
 	push();
-	textFont(baseFont);
+	textFont(baseFont.font);
 	rectMode(CENTER);
 	fill(122, 0, 0);
 	stroke(255);

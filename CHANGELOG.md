@@ -19,3 +19,7 @@
 
 1.1.2:
 * Updated BirbText
+
+1.2.0:
+* Added capitlization to keyboards
+* Added support for different keyboard layouts

@@ -12,12 +12,15 @@
     <script src="script.js"></script>
 		<div id="sketch-holder"></div>
 		<div>
-			<p><span>Base Font</span><select id="baseFont" onChange="updateBaseFont()"></select></p>
-			<p><span>Target Font</span><select id="targetFont" onChange="updateTargetFont()"></select></p>
+			<p><span>Base Font: </span><select id="baseFont" onChange="updateBaseFont()"></select><span>Keyboard Layout: </span><select id="baseFontLayout" onChange="updateBaseFontLayout()"></select></p>
+			<p><span>Target Font: </span><select id="targetFont" onChange="updateTargetFont()"></select><span>Keyboard Layout: </span><select id="targetFontLayout" onChange="updateTargetFontLayout()"></select></p>
 		</div>
 		<div>
 			<input type="button" value="Add Font" onClick="uploadFont()"/>
 			<input type="file" id="fontUpload"/>
+			<br/>
+			<input type="button" value="Add Keyboard Layout" onClick="uploadKeyboardLayout()"/>
+			<input type="file" id="layoutUpload"/>
 		</div>
 		<div>
 			<br/>
